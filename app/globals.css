@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --theme-primary: #5b5bd6;
+  --theme-primary-hover: #4848bd;
+  --theme-primary-foreground: #ffffff;
+  --theme-secondary: #0786a6;
+  --theme-secondary-hover: #066f8a;
+  --theme-secondary-foreground: #ffffff;
+  --theme-tertiary: #b73d9b;
+  --theme-tertiary-hover: #9a2f81;
+  --theme-tertiary-foreground: #ffffff;
+  --theme-accent: #b73d9b;
+  --theme-accent-foreground: #ffffff;
+  --theme-success: #168a62;
+  --theme-success-foreground: #ffffff;
+  --theme-warning: #b76b08;
+  --theme-warning-foreground: #ffffff;
+  --theme-danger: #d04455;
+  --theme-danger-foreground: #ffffff;
+  --theme-info: #0786a6;
+  --theme-info-foreground: #ffffff;
+  --theme-background: #f5f7fb;
+  --theme-surface: #ffffff;
+  --theme-surface-hover: #edf1f7;
+  --theme-border: #dfe4ed;
+  --theme-custom-foreground: #182033;
+  --theme-custom-dark-foreground: #edf2fb;
+  --theme-foreground: var(--theme-custom-foreground);
+  --theme-muted: #68738a;
+  color-scheme: light;
+}
+
+.dark {
+  --theme-primary: #9294ff;
+  --theme-primary-hover: #aaacff;
+  --theme-primary-foreground: #171836;
+  --theme-secondary: #45c6e8;
+  --theme-secondary-hover: #72d6ef;
+  --theme-secondary-foreground: #062f3d;
+  --theme-tertiary: #ee8ed6;
+  --theme-tertiary-hover: #f3afe1;
+  --theme-tertiary-foreground: #3d0c32;
+  --theme-accent: #ee8ed6;
+  --theme-accent-foreground: #3d0c32;
+  --theme-success: #50d3a2;
+  --theme-success-foreground: #073b2a;
+  --theme-warning: #f2b75a;
+  --theme-warning-foreground: #402400;
+  --theme-danger: #ff8290;
+  --theme-danger-foreground: #4a0710;
+  --theme-info: #45c6e8;
+  --theme-info-foreground: #062f3d;
+  --theme-background: #111827;
+  --theme-surface: #182235;
+  --theme-surface-hover: #222f46;
+  --theme-border: #2d3a50;
+  --theme-foreground: var(--theme-custom-dark-foreground);
+  --theme-muted: #9ca9bd;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: var(--theme-font-family, var(--font-outfit-sans));
+  --color-primary: var(--theme-primary);
+  --color-primary-hover: var(--theme-primary-hover);
+  --color-primary-foreground: var(--theme-primary-foreground);
+  --color-secondary: var(--theme-secondary);
+  --color-secondary-hover: var(--theme-secondary-hover);
+  --color-secondary-foreground: var(--theme-secondary-foreground);
+  --color-tertiary: var(--theme-tertiary);
+  --color-tertiary-hover: var(--theme-tertiary-hover);
+  --color-tertiary-foreground: var(--theme-tertiary-foreground);
+  --color-accent: var(--theme-accent);
+  --color-accent-foreground: var(--theme-accent-foreground);
+  --color-success: var(--theme-success);
+  --color-success-foreground: var(--theme-success-foreground);
+  --color-warning: var(--theme-warning);
+  --color-warning-foreground: var(--theme-warning-foreground);
+  --color-danger: var(--theme-danger);
+  --color-danger-foreground: var(--theme-danger-foreground);
+  --color-info: var(--theme-info);
+  --color-info-foreground: var(--theme-info-foreground);
+  --color-background: var(--theme-background);
+  --color-surface: var(--theme-surface);
+  --color-surface-hover: var(--theme-surface-hover);
+  --color-border: var(--theme-border);
+  --color-foreground: var(--theme-foreground);
+  --color-muted: var(--theme-muted);
+}
+
+* {
+  border-color: var(--theme-border);
+}
+
+html {
+  background: var(--theme-background);
+}
+
+body {
+  background: var(--theme-background);
+  color: var(--theme-foreground);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 4mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .print-controls {
+    display: none !important;
+  }
+
+  .print-page {
+    min-height: 0 !important;
+    background: #fff !important;
+  }
+
+  .ticket {
+    width: 72mm !important;
+    max-width: 72mm !important;
+  }
+}
+
+::selection {
+  background: color-mix(in srgb, var(--theme-secondary) 30%, transparent);
+  color: var(--theme-foreground);
+}

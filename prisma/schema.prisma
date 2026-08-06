@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma-20260804010000"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  MESERO
+  CLIENTE
+}
+
+enum CurrencyCode {
+  MXN
+  USD
+  EUR
+  COP
+  ARS
+  BRL
+}
+
+enum AppFontFamily {
+  OUTFIT
+  INTER
+  ROBOTO
+  POPPINS
+  MONTSERRAT
+  NUNITO_SANS
+  LATO
+  DM_SANS
+  RUBIK
+  PLUS_JAKARTA_SANS
+  MERRIWEATHER
+  PLAYFAIR_DISPLAY
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique @db.VarChar(30)
+  name         String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(254)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  role         UserRole @default(CLIENTE)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  customizationsUpdated AppCustomization[] @relation("CustomizationUpdatedBy")
+
+  @@index([role])
+  @@map("users")
+}
+
+model AppCustomization {
+  id                String        @id @db.VarChar(32)
+  appName           String        @default("Nexora") @map("app_name") @db.VarChar(60)
+  appSubtitle       String        @default("Product workspace") @map("app_subtitle") @db.VarChar(100)
+  primaryColor      String        @default("#5B5BD6") @map("primary_color") @db.VarChar(7)
+  secondaryColor    String        @default("#0786A6") @map("secondary_color") @db.VarChar(7)
+  tertiaryColor     String        @default("#B73D9B") @map("tertiary_color") @db.VarChar(7)
+  textColor         String        @default("#182033") @map("text_color") @db.VarChar(7)
+  currency          CurrencyCode  @default(MXN)
+  fontFamily        AppFontFamily @default(OUTFIT) @map("font_family")
+  logoLightUrl      String?       @map("logo_url") @db.VarChar(500)
+  logoLightPublicId String?       @map("logo_public_id") @db.VarChar(255)
+  logoDarkUrl       String?       @map("logo_dark_url") @db.VarChar(500)
+  logoDarkPublicId  String?       @map("logo_dark_public_id") @db.VarChar(255)
+  updatedById       String?       @map("updated_by_id")
+  updatedBy         User?         @relation("CustomizationUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  @@map("app_customization")
+}
