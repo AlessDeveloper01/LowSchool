@@ -115,6 +115,7 @@ export function DataTableGrid<T extends object>({
             return (
               <TableHead
                 key={columnKey}
+                align={column.headerAlign ?? column.align}
                 className={column.className}
                 aria-sort={
                   column.sortable
@@ -174,6 +175,7 @@ export function DataTableGrid<T extends object>({
                 {columns.map((column) => (
                   <TableCell
                     key={String(column.key)}
+                    align={column.align}
                     className={column.className}
                   >
                     {column.render

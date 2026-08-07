@@ -1,4 +1,3 @@
-import { SerwistProvider } from "@serwist/turbopack/react";
 import type { Viewport } from "next";
 import {
   DM_Sans,
@@ -18,8 +17,6 @@ import Script from "next/script";
 
 import { ToastProvider } from "@/components/feedback/toast";
 import { CustomizationProvider } from "@/features/customization/components/CustomizationProvider";
-import { ConnectionIndicator } from "@/features/offline/components/ConnectionIndicator";
-import { OfflineProvider } from "@/features/offline/components/OfflineProvider";
 import { themeInitializationScript } from "@/features/theme/lib/theme-script";
 
 import "./globals.css";
@@ -97,44 +94,6 @@ export const viewport: Viewport = {
   themeColor: "#2563eb",
 };
 
-const developmentServiceWorkerCleanupScript = `
-(() => {
-  if (!("serviceWorker" in navigator)) return;
-
-  const reloadKey = "lowpos-development-worker-cleanup";
-  const belongsToLowPOS = (registration) =>
-    [registration.active, registration.waiting, registration.installing].some(
-      (worker) => worker?.scriptURL.includes("/serwist/sw.js"),
-    );
-
-  void Promise.all([
-    navigator.serviceWorker.getRegistrations(),
-    "caches" in window ? caches.keys() : Promise.resolve([]),
-  ]).then(async ([registrations, cacheNames]) => {
-    const ownRegistrations = registrations.filter(belongsToLowPOS);
-    const ownCacheNames = cacheNames.filter(
-      (name) => name.startsWith("serwist") || name.startsWith("lowpos-static"),
-    );
-    const foundArtifacts = ownRegistrations.length > 0 || ownCacheNames.length > 0;
-
-    await Promise.all([
-      ...ownRegistrations.map((registration) => registration.unregister()),
-      ...ownCacheNames.map((name) => caches.delete(name)),
-    ]);
-
-    if (!foundArtifacts) {
-      sessionStorage.removeItem(reloadKey);
-      return;
-    }
-
-    if (sessionStorage.getItem(reloadKey) !== "1") {
-      sessionStorage.setItem(reloadKey, "1");
-      window.location.reload();
-    }
-  });
-})();
-`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -152,28 +111,10 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeInitializationScript }}
         />
-        {process.env.NODE_ENV === "development" && (
-          <Script
-            id="development-service-worker-cleanup"
-            strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{
-              __html: developmentServiceWorkerCleanupScript,
-            }}
-          />
-        )}
-        <SerwistProvider
-          swUrl="/serwist/sw.js"
-          disable={process.env.NODE_ENV === "development"}
-          cacheOnNavigation={false}
-          reloadOnOnline={false}
-        >
-          <ToastProvider position="bottom-center">
-            <CustomizationProvider />
-            <OfflineProvider />
-            <ConnectionIndicator />
-            {children}
-          </ToastProvider>
-        </SerwistProvider>
+        <ToastProvider position="bottom-center">
+          <CustomizationProvider />
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

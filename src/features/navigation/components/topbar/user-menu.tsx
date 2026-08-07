@@ -17,18 +17,11 @@ import type {
   UserRole,
 } from "@/features/auth/types/auth.types";
 import { useNavigationStore } from "@/features/navigation/store/navigationStore";
-import {
-  clearOfflineLogoutCookie,
-  clearPendingServerLogout,
-  markOfflineLogoutCookie,
-  markPendingServerLogout,
-} from "@/features/offline/services/offlineSessionDb";
-import { useOfflineStore } from "@/features/offline/store/offlineStore";
 
 const roleLabels: Record<UserRole, string> = {
   SUPER_ADMIN: "Super admin",
-  MESERO: "Mesero",
-  CLIENTE: "Cliente",
+  ADMIN: "Administrador",
+  ADMINISTRATIVO: "Administrativo",
 };
 
 interface UserMenuProps {
@@ -42,8 +35,6 @@ export function UserMenu({ user }: UserMenuProps) {
   const isSigningOut = useNavigationStore((state) => state.logoutPending);
   const setOpen = useNavigationStore((state) => state.setUserMenuOpen);
   const setLogoutPending = useNavigationStore((state) => state.setLogoutPending);
-  const checkConnection = useOfflineStore((state) => state.checkConnection);
-  const clearLocalSession = useOfflineStore((state) => state.clearLocalSession);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent): void {
@@ -75,28 +66,9 @@ export function UserMenu({ user }: UserMenuProps) {
     setLogoutPending(true);
 
     try {
-      const currentConnectivity = await checkConnection();
-      const serverAvailable = currentConnectivity === "online";
-
-      markOfflineLogoutCookie();
-      await clearLocalSession(!serverAvailable);
-
-      if (serverAvailable) {
-        try {
-          await clearServerSessionAction();
-          await clearPendingServerLogout();
-          clearOfflineLogoutCookie();
-        } catch {
-          await markPendingServerLogout();
-        }
-      }
-
-      if (serverAvailable) {
-        router.replace("/login");
-        router.refresh();
-      } else {
-        window.location.replace("/offline-login");
-      }
+      await clearServerSessionAction();
+      router.replace("/login");
+      router.refresh();
     } finally {
       setLogoutPending(false);
     }

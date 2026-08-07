@@ -5,103 +5,25 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-// Helper para no repetir el create+link cada vez
-async function linkVariantGroup(productoId: string, grupoVarianteId: string) {
-  return prisma.productoGrupoVariante.create({
-    data: { productoId, grupoVarianteId },
-  });
-}
-async function linkExtraGroup(productoId: string, grupoExtraId: string) {
-  return prisma.productoGrupoExtra.create({
-    data: { productoId, grupoExtraId },
-  });
-}
-
 async function main() {
-  // ---------- CATEGORÍAS ----------
+  console.log("No hay datos de seed configurados para el esquema actual.");
+}
 
-  await prisma.productoGrupoVariante.deleteMany();
-  await prisma.productoGrupoExtra.deleteMany();
-  await prisma.variante.deleteMany();
-  await prisma.extra.deleteMany();
-  await prisma.grupoVariante.deleteMany();
-  await prisma.grupoExtra.deleteMany();
-  await prisma.producto.deleteMany();
-  await prisma.categoria.deleteMany();
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (error) => {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
 
-  const catBebidas = await prisma.categoria.create({
-    data: { nombre: "Bebidas" },
-  });
-  const catMicheladas = await prisma.categoria.create({
-    data: { nombre: "Micheladas" },
-  });
-  const catCocteleria = await prisma.categoria.create({
-    data: { nombre: "Coctelería" },
-  });
-  const catCervezas = await prisma.categoria.create({
-    data: { nombre: "Cervezas" },
-  });
-  const catLicores = await prisma.categoria.create({
-    data: { nombre: "Copas de Licor" },
-  });
-  const catMezcal = await prisma.categoria.create({
-    data: { nombre: "Mezcal de la Casa" },
-  });
-  const catAntojitos = await prisma.categoria.create({
-    data: { nombre: "Antojitos Oaxaqueños" },
-  });
-  const catDesayunos = await prisma.categoria.create({
-    data: { nombre: "Desayunos en Paquetes" },
-  });
-  const catOmelets = await prisma.categoria.create({
-    data: { nombre: "Omelets" },
-  });
-  const catDeLaCasa = await prisma.categoria.create({
-    data: { nombre: "De la Casa" },
-  });
-  const catRegion = await prisma.categoria.create({
-    data: { nombre: "Comida de la Región" },
-  });
-  const catTlayudas = await prisma.categoria.create({
-    data: { nombre: "Tlayudas" },
-  });
-  const catParrilla = await prisma.categoria.create({
-    data: { nombre: "De la Parrilla" },
-  });
-  const catComidaMar = await prisma.categoria.create({
-    data: { nombre: "Comida del Mar" },
-  });
-  const catCocteles = await prisma.categoria.create({
-    data: { nombre: "Cocteles" },
-  });
-  const catEnsaladas = await prisma.categoria.create({
-    data: { nombre: "Ensaladas" },
-  });
-  const catCaldos = await prisma.categoria.create({
-    data: { nombre: "Caldos" },
-  });
-  const catPastas = await prisma.categoria.create({
-    data: { nombre: "Pastas" },
-  });
-  const catCamarones = await prisma.categoria.create({
-    data: { nombre: "Camarones" },
-  });
-  const catPulpo = await prisma.categoria.create({ data: { nombre: "Pulpo" } });
-  const catMojarras = await prisma.categoria.create({
-    data: { nombre: "Mojarras" },
-  });
-  const catFiletes = await prisma.categoria.create({
-    data: { nombre: "Filetes" },
-  });
-  const catEspecialidades = await prisma.categoria.create({
-    data: { nombre: "Especialidades" },
-  });
-  const catPostres = await prisma.categoria.create({
-    data: { nombre: "Postres" },
-  });
-  const catInfantil = await prisma.categoria.create({
-    data: { nombre: "Menú Infantil" },
-  });
+/*
+  Datos de catálogo heredados conservados temporalmente como referencia.
+  El esquema actual sólo contiene usuarios y personalización.
+*/
+/*
 
   // ---------- GRUPO DE EXTRAS (reutilizable) ----------
   const grupoGuarniciones = await prisma.grupoExtra.create({
@@ -1306,11 +1228,4 @@ async function main() {
   console.log("✅ Seed completado");
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+*/

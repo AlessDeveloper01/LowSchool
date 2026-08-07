@@ -15,7 +15,6 @@ import type {
 } from "@/features/auth/types/auth.types";
 
 const SESSION_COOKIE = "lowpos_session";
-const OFFLINE_LOGOUT_COOKIE = "lowpos_offline_logout";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 const PASSWORD_SALT_ROUNDS = 12;
 
@@ -88,7 +87,6 @@ async function createSession(user: SessionUser): Promise<void> {
     .sign(sessionSecret());
 
   const cookieStore = await cookies();
-  cookieStore.delete(OFFLINE_LOGOUT_COOKIE);
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
@@ -101,13 +99,10 @@ async function createSession(user: SessionUser): Promise<void> {
 async function deleteSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE);
-  cookieStore.delete(OFFLINE_LOGOUT_COOKIE);
 }
 
 const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const cookieStore = await cookies();
-  if (cookieStore.has(OFFLINE_LOGOUT_COOKIE)) return null;
-
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
 

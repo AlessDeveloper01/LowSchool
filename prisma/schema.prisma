@@ -14,8 +14,8 @@ datasource db {
 
 enum UserRole {
   SUPER_ADMIN
-  MESERO
-  CLIENTE
+  ADMIN
+  ADMINISTRATIVO
 }
 
 enum CurrencyCode {
@@ -42,13 +42,18 @@ enum AppFontFamily {
   PLAYFAIR_DISPLAY
 }
 
+enum Sexo {
+  H
+  M
+}
+
 model User {
   id           String   @id @default(cuid())
   username     String   @unique @db.VarChar(30)
   name         String   @db.VarChar(100)
   email        String   @unique @db.VarChar(254)
   passwordHash String   @map("password_hash") @db.VarChar(255)
-  role         UserRole @default(CLIENTE)
+  role         UserRole @default(ADMINISTRATIVO)
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -61,8 +66,8 @@ model User {
 
 model AppCustomization {
   id                String        @id @db.VarChar(32)
-  appName           String        @default("Nexora") @map("app_name") @db.VarChar(60)
-  appSubtitle       String        @default("Product workspace") @map("app_subtitle") @db.VarChar(100)
+  appName           String        @default("LowSchool") @map("app_name") @db.VarChar(60)
+  appSubtitle       String        @default("Gestión escolar") @map("app_subtitle") @db.VarChar(100)
   primaryColor      String        @default("#5B5BD6") @map("primary_color") @db.VarChar(7)
   secondaryColor    String        @default("#0786A6") @map("secondary_color") @db.VarChar(7)
   tertiaryColor     String        @default("#B73D9B") @map("tertiary_color") @db.VarChar(7)
@@ -79,4 +84,97 @@ model AppCustomization {
   updatedAt         DateTime      @updatedAt @map("updated_at")
 
   @@map("app_customization")
+}
+
+model CicloEscolar {
+  id     String  @id @default(cuid())
+  nombre String  @unique // "2026-2027"
+  activo Boolean @default(false)
+  grupos Grupo[]
+}
+
+model Grupo {
+  id             String         @id @default(cuid())
+  grado          Int // 1, 2, 3
+  letra          String // "A", "B", "C"
+  cicloEscolar   CicloEscolar   @relation(fields: [cicloEscolarId], references: [id])
+  cicloEscolarId String
+  materias       MateriaGrupo[]
+  inscripciones  Inscripcion[]
+
+  @@unique([cicloEscolarId, grado, letra])
+}
+
+model Materia {
+  id     String         @id @default(cuid())
+  nombre String
+  grupos MateriaGrupo[]
+}
+
+model MateriaGrupo {
+  id             String         @id @default(cuid())
+  materia        Materia        @relation(fields: [materiaId], references: [id])
+  materiaId      String
+  grupo          Grupo          @relation(fields: [grupoId], references: [id])
+  grupoId        String
+  calificaciones Calificacion[]
+  asistencias    Asistencia[]
+}
+
+model Alumno {
+  id                  String        @id @default(cuid())
+  nombre              String
+  apellidos           String
+  matricula           String        @unique
+  sexo                Sexo?
+  tecnologia          String? // Diseño de software, Inteligencia artificial
+  direccion           String?
+  curp                String?       @unique
+  fechaNacimiento     DateTime?
+  telefonoResponsable String?
+  nombreResponsable   String?
+  inscripciones       Inscripcion[]
+}
+
+model Inscripcion {
+  id             String         @id @default(cuid())
+  alumno         Alumno         @relation(fields: [alumnoId], references: [id])
+  alumnoId       String
+  grupo          Grupo          @relation(fields: [grupoId], references: [id])
+  grupoId        String
+  repetidor      Boolean        @default(false) // viene de repetir año
+  calificaciones Calificacion[]
+  asistencias    Asistencia[]
+
+  @@unique([alumnoId, grupoId])
+}
+
+enum Trimestre {
+  T1
+  T2
+  T3
+}
+
+model Calificacion {
+  id             String       @id @default(cuid())
+  inscripcion    Inscripcion  @relation(fields: [inscripcionId], references: [id])
+  inscripcionId  String
+  materiaGrupo   MateriaGrupo @relation(fields: [materiaGrupoId], references: [id])
+  materiaGrupoId String
+  trimestre      Trimestre
+  valor          Float
+
+  @@index([inscripcionId, materiaGrupoId, trimestre])
+}
+
+model Asistencia {
+  id             String       @id @default(cuid())
+  inscripcion    Inscripcion  @relation(fields: [inscripcionId], references: [id])
+  inscripcionId  String
+  materiaGrupo   MateriaGrupo @relation(fields: [materiaGrupoId], references: [id])
+  materiaGrupoId String
+  trimestre      Trimestre
+  faltas         Int          @default(0)
+
+  @@unique([inscripcionId, materiaGrupoId, trimestre])
 }

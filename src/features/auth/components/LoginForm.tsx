@@ -13,7 +13,6 @@ import {
 import { signInAction } from "@/features/auth/actions/auth-actions";
 import { signInSchema } from "@/features/auth/schemas/authSchema";
 import { useAuthStore } from "@/features/auth/store/authStore";
-import { useOfflineStore } from "@/features/offline/store/offlineStore";
 
 export function LoginForm() {
   const router = useRouter();
@@ -26,14 +25,6 @@ export function LoginForm() {
     setLoginPending,
     resetLogin,
   } = useAuthStore();
-  const checkConnection = useOfflineStore((state) => state.checkConnection);
-  const restoreOfflineSession = useOfflineStore(
-    (state) => state.restoreOfflineSession,
-  );
-  const authorizeAfterOnlineLogin = useOfflineStore(
-    (state) => state.authorizeAfterOnlineLogin,
-  );
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     const parsed = signInSchema.safeParse(loginInput);
@@ -50,47 +41,18 @@ export function LoginForm() {
     setLoginPending(true);
 
     try {
-      const connectivity = await checkConnection();
-
-      if (connectivity !== "online") {
-        if (connectivity === "server-unavailable") {
-          setLoginResult({
-            success: false,
-            message: "Tienes conexión a internet, pero el servidor no está disponible.",
-          });
-          return;
-        }
-
-        const authorization = await restoreOfflineSession();
-        const messages = {
-          valid: "Abriendo la sesión offline guardada.",
-          missing: "Debes iniciar sesión con internet al menos una vez para usar el modo offline.",
-          expired: "Tu acceso offline venció. Conéctate a internet para iniciar sesión nuevamente.",
-          unknown: "No fue posible comprobar el acceso offline.",
-        } as const;
-
-        setLoginResult({ success: authorization === "valid", message: messages[authorization] });
-        if (authorization === "valid") window.location.replace("/offline");
-        return;
-      }
-
       const result = await signInAction(loginInput);
       setLoginResult(result);
 
       if (result.success && result.data) {
-        await authorizeAfterOnlineLogin(result.data);
         resetLogin();
         router.replace("/orders");
         router.refresh();
       }
     } catch {
-      const connectivity = await checkConnection();
       setLoginResult({
         success: false,
-        message:
-          connectivity === "offline"
-            ? "Sin conexión. Reintenta cuando tengas internet."
-            : "Tienes conexión a internet, pero el servidor no está disponible.",
+        message: "No fue posible iniciar sesión. Inténtalo nuevamente.",
       });
     } finally {
       setLoginPending(false);

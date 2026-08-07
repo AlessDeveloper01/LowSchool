@@ -1,7 +1,7 @@
 export const ROLES_DICTIONARY: Record<string, string> = {
   SUPER_ADMIN: "Super Administrador",
   ADMIN: "Administrador",
-  USER: "Usuario",
+  ADMINISTRATIVO: "Administrativo",
   CLIENTE: "Cliente"
 }
 

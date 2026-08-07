@@ -6,7 +6,6 @@ import type { SessionUser } from "@/features/auth/types/auth.types";
 import { Sidebar } from "@/features/navigation/components/sidebar/sidebar";
 import { Topbar } from "@/features/navigation/components/topbar/topbar";
 import { useNavigationStore } from "@/features/navigation/store/navigationStore";
-import { OnlineSessionBridge } from "@/features/offline/components/OnlineSessionBridge";
 
 interface NavigationShellProps {
   children: ReactNode;
@@ -19,7 +18,6 @@ export function NavigationShell({ children, user }: NavigationShellProps) {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      <OnlineSessionBridge user={user} />
       <Sidebar
         userRole={user.role}
         mobileOpen={mobileMenuOpen}

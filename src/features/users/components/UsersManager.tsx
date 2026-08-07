@@ -69,7 +69,7 @@ export function UsersManager({ users, currentUserId }: { users: ManagedUser[]; c
             <NativeSelect aria-label="Filtrar por estado" value={statusFilter} options={statusOptions} onChange={(event) => setStatusFilter(event.target.value as UserStatusFilter)} />
           </div>
           <Table variant="hoverable">
-            <TableHeader><TableRow><TableHead>Usuario</TableHead><TableHead>Username</TableHead><TableHead>Rol</TableHead><TableHead>Estado</TableHead><TableHead>Actualización</TableHead><TableHead className="text-right">Acciones</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Usuario</TableHead><TableHead>Username</TableHead><TableHead>Rol</TableHead><TableHead>Estado</TableHead><TableHead>Actualización</TableHead><TableHead align="end">Acciones</TableHead></TableRow></TableHeader>
             <TableBody>
               {filtered.length === 0 ? <TableEmpty colSpan={6} message={users.length === 0 ? "Todavía no hay usuarios." : "No hay usuarios que coincidan con los filtros."} /> : filtered.map((user) => (
                 <TableRow key={user.id} className={!user.isActive ? "opacity-65" : undefined}>
@@ -78,7 +78,7 @@ export function UsersManager({ users, currentUserId }: { users: ManagedUser[]; c
                   <TableCell><Badge variant={user.role === "SUPER_ADMIN" ? "soft" : "outline"}>{roleLabels[user.role]}</Badge></TableCell>
                   <TableCell><StatusBadge status={user.isActive ? "active" : "inactive"} /></TableCell>
                   <TableCell className="whitespace-nowrap text-xs text-muted">{dateFormatter.format(new Date(user.updatedAt))}</TableCell>
-                  <TableCell><TableActions variant="dropdown" actions={[
+                  <TableCell align="end"><TableActions variant="dropdown" actions={[
                     { id: "edit", label: "Editar", icon: <LuPencil />, onSelect: () => openEdit(user) },
                     user.isActive
                       ? { id: "deactivate", label: "Desactivar", icon: <LuPowerOff />, destructive: true, disabled: user.id === currentUserId, onSelect: () => openStatus(user, false) }

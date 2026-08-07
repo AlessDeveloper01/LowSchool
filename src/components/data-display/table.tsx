@@ -21,6 +21,16 @@ export type TableVariant =
   | "comfortable"
   | "hoverable";
 
+export type TableCellAlign = "start" | "end" | "center" | "left" | "right";
+
+const tableCellAlignClassNames: Record<TableCellAlign, string> = {
+  start: "text-start",
+  end: "text-end",
+  center: "text-center",
+  left: "text-left",
+  right: "text-right",
+};
+
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   variant?: TableVariant;
   stickyHeader?: boolean;
@@ -116,19 +126,48 @@ export function TableRow({
     />
   );
 }
+export interface TableHeadProps
+  extends Omit<ThHTMLAttributes<HTMLTableCellElement>, "align"> {
+  align?: TableCellAlign;
+}
+
 export function TableHead({
+  align,
   className,
   ...props
-}: ThHTMLAttributes<HTMLTableCellElement>) {
+}: TableHeadProps) {
   return (
-    <th className={cn("px-4 py-3 font-extrabold", className)} {...props} />
+    <th
+      className={cn(
+        "px-4 py-3 font-extrabold",
+        align && tableCellAlignClassNames[align],
+        className,
+      )}
+      {...props}
+    />
   );
 }
+
+export interface TableCellProps
+  extends Omit<TdHTMLAttributes<HTMLTableCellElement>, "align"> {
+  align?: TableCellAlign;
+}
+
 export function TableCell({
+  align,
   className,
   ...props
-}: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("px-4 py-3 align-middle", className)} {...props} />;
+}: TableCellProps) {
+  return (
+    <td
+      className={cn(
+        "px-4 py-3 align-middle",
+        align && tableCellAlignClassNames[align],
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 export function TableCaption({
   className,

@@ -11,11 +11,14 @@ import type {
   TableFilterValues,
 } from "@/components/data-display/table-filters";
 import type { DesignPreset, SurfaceMode } from "@/components/types";
+import type { TableCellAlign } from "./table";
 
 export interface DataTableColumn<T> {
   key: keyof T | string;
   header: string;
   sortable?: boolean;
+  align?: TableCellAlign;
+  headerAlign?: TableCellAlign;
   className?: string;
   render?: (item: T) => ReactNode;
 }

@@ -78,49 +78,6 @@ Consulta `.env.example`:
 - `CLOUDINARY_API_KEY`: clave de API de Cloudinary, disponible sólo en servidor.
 - `CLOUDINARY_API_SECRET`: secreto de Cloudinary, disponible sólo en servidor.
 
-## Base offline y PWA
-
-La aplicación distingue `offline`, `online`, `server-unavailable` y
-`checking`. `navigator.onLine` sólo descarta rápidamente una red desconectada;
-la disponibilidad real de esta instancia se confirma con `GET /api/health`.
-La comprobación corre al abrir, al cambiar la red, al volver a la pestaña, antes
-del login y al usar **Reintentar conexión**.
-
-Después de un login online válido se guarda en IndexedDB, durante 24 horas,
-únicamente `id`, `name`, `username`, `role`, fecha de login y expiración. La
-contraseña, la cookie de sesión, el JWT y cualquier secreto nunca se copian al
-almacenamiento local. Zustand sólo refleja estado transitorio de UI; IndexedDB
-es la persistencia local.
-
-El Service Worker de Serwist precachea los recursos estáticos y las pantallas
-`/offline` y `/offline-login`. El resto usa red exclusivamente: no se cachean
-login, Server Actions, API, dashboard, respuestas personales ni mutaciones.
-
-### Prueba manual
-
-El modo offline se prueba sobre producción local. Serwist no genera el precache
-completo durante `next dev` y el registro del Worker está desactivado en ese
-entorno para no interferir con Turbopack ni HMR.
-
-1. Ejecuta `pnpm build` y `pnpm start`; abre `/login` con conexión.
-2. Inicia sesión correctamente y confirma en DevTools > Application > IndexedDB
-   la base `lowpos-offline`. Sólo debe existir el perfil mínimo y sus fechas.
-3. En DevTools > Network selecciona **Offline**, recarga `/login` y verifica que
-   se abra la sesión limitada en `/offline` con el indicador **Modo offline**.
-4. Cambia `expiresAt` en IndexedDB a un número anterior a `Date.now()`, recarga
-   offline y verifica el mensaje de acceso vencido.
-5. Para diferenciar estados, usa **Offline** para `Sin conexión`; para
-   `Servidor no disponible`, conserva la red activa y detén `pnpm start`.
-6. Cierra sesión sin red y verifica que desaparezca `offline-authorization`.
-   La marca pendiente no contiene datos del usuario y la cookie segura del
-   servidor se elimina automáticamente cuando vuelve la conexión.
-
-Para limpiar la PWA durante desarrollo: DevTools > Application > Service
-Workers > **Unregister**, después Application > Storage > **Clear site data**.
-También puedes ejecutar en la consola del navegador
-`navigator.serviceWorker.getRegistrations().then(items => items.forEach(item => item.unregister()))`
-y borrar manualmente Cache Storage e IndexedDB.
-
 ## Personalización global
 
 El usuario `SUPER_ADMIN` puede abrir `/settings/customization` y configurar los

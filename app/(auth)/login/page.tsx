@@ -18,7 +18,7 @@ export default async function LoginPage() {
     <main className="grid min-h-screen place-items-center bg-background p-6 text-foreground">
       <section className="w-full max-w-lg rounded-2xl border border-border bg-surface px-7 py-6">
         <p className="mb-6 text-center text-2xl font-black text-secondary">
-          LowPOS
+          LowSchool
         </p>
         <h1 className="text-2xl font-black uppercase tracking-tight">
           Iniciar sesión

@@ -17,24 +17,22 @@ export function CustomizationProvider() {
     const cached = readCachedCustomization();
     if (cached) initialize(cached);
 
-    function refreshWhenAvailable(): void {
-      if (navigator.onLine && document.visibilityState === "visible") {
+    function refreshWhenVisible(): void {
+      if (document.visibilityState === "visible") {
         void refreshFromServer();
       }
     }
 
-    refreshWhenAvailable();
+    refreshWhenVisible();
     const intervalId = window.setInterval(
-      refreshWhenAvailable,
+      refreshWhenVisible,
       REFRESH_INTERVAL_MS,
     );
-    window.addEventListener("online", refreshWhenAvailable);
-    document.addEventListener("visibilitychange", refreshWhenAvailable);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
 
     return () => {
       window.clearInterval(intervalId);
-      window.removeEventListener("online", refreshWhenAvailable);
-      document.removeEventListener("visibilitychange", refreshWhenAvailable);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
   }, [initialize, refreshFromServer]);
 

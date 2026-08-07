@@ -89,7 +89,7 @@ export const useCustomizationStore = create<CustomizationState>((set, get) => ({
             : { draft: toInput(parsed.data), draftDirty: false }),
         });
       } catch {
-        // The cached, non-sensitive customization remains active while offline.
+        // Keep the last valid customization when the refresh fails.
       } finally {
         set({ loading: false });
       }

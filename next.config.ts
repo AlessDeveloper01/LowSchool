@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { withSerwist } from "@serwist/turbopack";
 
 const nextConfig: NextConfig = {
   typedRoutes: false,
@@ -17,23 +16,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async headers() {
-    return [
-      {
-        source: "/serwist/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "no-cache, no-store, must-revalidate",
-          },
-          {
-            key: "Service-Worker-Allowed",
-            value: "/",
-          },
-        ],
-      },
-    ];
-  },
 };
 
-export default withSerwist(nextConfig);
+export default nextConfig;

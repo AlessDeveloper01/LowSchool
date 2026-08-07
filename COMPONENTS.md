@@ -549,8 +549,8 @@ import {
 | `TableBody` | Atributos `tbody` | — | `<TableBody>...</TableBody>` |
 | `TableFooter` | Atributos `tfoot` | — | `<TableFooter>...</TableFooter>` |
 | `TableRow` | `selected` | Normal/seleccionada | `<TableRow selected />` |
-| `TableHead` | Atributos `th` | — | `<TableHead>Nombre</TableHead>` |
-| `TableCell` | Atributos `td` | — | `<TableCell>Ana</TableCell>` |
+| `TableHead` | Atributos `th`, `align` | `start`, `end`, `center`, `left`, `right` | `<TableHead align="center">Nombre</TableHead>` |
+| `TableCell` | Atributos `td`, `align` | `start`, `end`, `center`, `left`, `right` | `<TableCell align="end">Ana</TableCell>` |
 | `TableCaption` | Atributos `caption` | — | `<TableCaption>Usuarios</TableCaption>` |
 | `TableEmpty` | `colSpan`, `message` | Vacío | `<TableEmpty colSpan={4} />` |
 | `TableLoading` | `colSpan` | Loading | `<TableLoading colSpan={4} />` |
@@ -583,8 +583,8 @@ type MemberFilterId = "status" | "role";
 
 const columns = [
   { key: "name", header: "Nombre", sortable: true },
-  { key: "role", header: "Rol", sortable: true },
-  { key: "status", header: "Estado" },
+  { key: "role", header: "Rol", sortable: true, align: "center" },
+  { key: "status", header: "Estado", align: "end" },
 ] satisfies DataTableColumn<Member>[];
 
 const memberFilters = [

@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: name,
     description:
       process.env.NEXT_PUBLIC_APP_DESCRIPTION ??
-      "Aplicación monolítica con acceso offline controlado",
+      "Aplicación monolítica para gestión de ventas",
     start_url: "/",
     display: "standalone",
     background_color: "#f8fafc",

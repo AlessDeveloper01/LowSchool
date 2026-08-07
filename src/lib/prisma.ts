@@ -135,17 +135,6 @@ export function getPrisma(): PrismaClient {
   const adapter = new PrismaPg({ connectionString });
   const client = new PrismaClient({ adapter });
 
-  if (
-    !hasRequiredDelegates(client) ||
-    !hasCurrentOrderFields(client) ||
-    !hasCurrentBoxFields(client)
-  ) {
-    void client.$disconnect().catch(() => undefined);
-    throw new Error(
-      "El proceso conserva un Prisma Client anterior al módulo de cajas. Ejecuta prisma generate y reinicia pnpm dev para cargar el esquema 20260804010000.",
-    );
-  }
-
   if (process.env.NODE_ENV !== "production") {
     prismaGlobal.prisma = client;
     prismaGlobal.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
