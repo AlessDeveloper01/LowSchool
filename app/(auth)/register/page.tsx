@@ -12,7 +12,7 @@ export const metadata = generateMetadata({
 export default async function RegisterPage() {
   const user = await AuthService.getSessionUser();
 
-  if (user) redirect("/orders");
+  if (user) redirect("/dashboard");
 
   return (
     <main className="grid min-h-screen place-items-center bg-background p-6 text-foreground">

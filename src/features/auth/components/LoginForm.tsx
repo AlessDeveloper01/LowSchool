@@ -46,7 +46,7 @@ export function LoginForm() {
 
       if (result.success && result.data) {
         resetLogin();
-        router.replace("/orders");
+        router.replace("/dashboard");
         router.refresh();
       }
     } catch {

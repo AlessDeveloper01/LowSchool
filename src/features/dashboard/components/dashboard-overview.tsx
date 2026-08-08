@@ -69,13 +69,13 @@ export function DashboardOverview({ data, user, currency }: DashboardOverviewPro
         {canOperate && (
           <div className="flex flex-col gap-2 sm:flex-row">
             <Link
-              href="/orders/list"
+              href="/dashboard"
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-black text-foreground transition-colors hover:bg-surface-hover"
             >
               <LuReceiptText /> Ver pedidos
             </Link>
             <Link
-              href="/orders"
+              href="/dashboard"
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               <LuShoppingCart /> Crear pedido

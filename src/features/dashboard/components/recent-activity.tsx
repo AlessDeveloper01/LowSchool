@@ -59,7 +59,7 @@ export function RecentActivity({ orders, currency }: RecentActivityProps) {
       )}
 
       <Link
-        href="/orders/list"
+        href="/dashboard"
         className="mt-5 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-border text-xs font-black text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
       >
         Ver todas las órdenes <LuArrowRight />

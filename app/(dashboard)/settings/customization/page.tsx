@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export default async function CustomizationPage() {
   const user = await AuthService.getSessionUser();
-  if (!user || user.role !== "SUPER_ADMIN") redirect("/orders");
+  if (!user || user.role !== "SUPER_ADMIN") redirect("/dashboard");
 
   const customization = await CustomizationService.getCustomization();
 

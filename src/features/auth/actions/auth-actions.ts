@@ -64,7 +64,7 @@ export async function registerAction(
   }
 
   await AuthService.createSession(result.user);
-  redirect("/orders");
+  redirect("/dashboard");
 }
 
 export async function signOutAction(): Promise<void> {
