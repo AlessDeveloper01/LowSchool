@@ -83,13 +83,6 @@ export const navigationConfig: NavRootItem[] = [
     href: "/grades",
   },
   {
-    id: "reports",
-    label: "Reportes",
-    icon: LuFileArchive,
-    type: "link",
-    href: "/reports",
-  },
-  {
     id: "users",
     label: "Usuarios",
     icon: LuUserCog,

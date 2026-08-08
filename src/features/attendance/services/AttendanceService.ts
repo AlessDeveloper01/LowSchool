@@ -35,7 +35,7 @@ export async function getAttendanceData(): Promise<AttendanceData> {
         grupoId: true,
         alumno: { select: { id: true, nombre: true, apellidos: true, matricula: true } },
         asistencias: {
-          select: { materiaGrupoId: true, trimestre: true, faltas: true },
+          select: { materiaGrupoId: true, trimestre: true, asistencias: true, faltas: true },
         },
       },
       orderBy: { alumno: { matricula: "asc" } },
@@ -64,7 +64,7 @@ export async function getAttendanceData(): Promise<AttendanceData> {
     attendance: inscription.asistencias.map((attendance) => ({
       materiaGrupoId: attendance.materiaGrupoId,
       trimestre: attendance.trimestre,
-      asistencias: 0,
+      asistencias: attendance.asistencias,
       faltas: attendance.faltas,
     })),
   }));
@@ -106,7 +106,7 @@ export async function saveAttendance(updates: AttendanceUpdateInput[]): Promise<
       if (current) {
         await transaction.asistencia.update({
           where: { id: current.id },
-          data: { faltas: update.faltas },
+          data: { asistencias: update.asistencias, faltas: update.faltas },
         });
       } else {
         await transaction.asistencia.create({
@@ -114,6 +114,7 @@ export async function saveAttendance(updates: AttendanceUpdateInput[]): Promise<
             inscripcionId: update.inscriptionId,
             materiaGrupoId: update.materiaGrupoId,
             trimestre: update.trimestre,
+            asistencias: update.asistencias,
             faltas: update.faltas,
           },
         });

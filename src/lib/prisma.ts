@@ -121,7 +121,9 @@ export function getPrisma(): PrismaClient {
   }
 
   if (prismaGlobal.prisma) {
-    void prismaGlobal.prisma.$disconnect().catch(() => undefined);
+    // Do not disconnect here: requests can still be using the old client while
+    // Next.js reloads the module during development. Closing its pg pool makes
+    // those in-flight queries fail with "Cannot use a pool after calling end".
     prismaGlobal.prisma = undefined;
     prismaGlobal.prismaSchemaVersion = undefined;
   }
@@ -135,10 +137,8 @@ export function getPrisma(): PrismaClient {
   const adapter = new PrismaPg({ connectionString });
   const client = new PrismaClient({ adapter });
 
-  if (process.env.NODE_ENV !== "production") {
-    prismaGlobal.prisma = client;
-    prismaGlobal.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
-  }
+  prismaGlobal.prisma = client;
+  prismaGlobal.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
 
   return client;
 }
