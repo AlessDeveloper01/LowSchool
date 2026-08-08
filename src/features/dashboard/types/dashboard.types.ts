@@ -1,5 +1,3 @@
-import type { BoxSummary } from "@/features/box/types/box.types";
-
 export interface DashboardMetricComparison {
   value: number | null;
   label: string;
@@ -51,5 +49,4 @@ export interface DashboardOverviewData {
   hourlySales: DashboardHourlySale[];
   topProducts: DashboardTopProduct[];
   recentOrders: DashboardRecentOrder[];
-  activeBox: BoxSummary | null;
 }
