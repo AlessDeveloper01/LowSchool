@@ -27,16 +27,25 @@ export async function signInAction(
     };
   }
 
-  const user = await AuthService.authenticate(parsed.data);
+  let user;
+  try {
+    user = await AuthService.authenticate(parsed.data);
 
-  if (!user) {
+    if (!user) {
+      return {
+        success: false,
+        message: "El usuario o la contraseña no son correctos.",
+      };
+    }
+
+    await AuthService.createSession(user);
+  } catch (error) {
+    console.error("[auth] Error al autenticar usuario", error);
     return {
       success: false,
-      message: "El usuario o la contraseña no son correctos.",
+      message: "El servicio de autenticación no está disponible. Verifica la base de datos de producción.",
     };
   }
-
-  await AuthService.createSession(user);
   return { success: true, data: user };
 }
 

@@ -10,22 +10,7 @@ type PrismaGlobal = typeof globalThis & {
 };
 
 const prismaGlobal = globalThis as PrismaGlobal;
-const PRISMA_SCHEMA_VERSION = "20260804010000";
-const REQUIRED_PRODUCT_FIELDS = [
-  "id",
-  "nombre",
-  "descripcion",
-  "sku",
-  "precioBase",
-  "modoPrecio",
-  "categoriaId",
-  "imagenUrl",
-  "imagenPublicId",
-  "activo",
-  "deletedAt",
-  "gruposVariantes",
-  "gruposExtras",
-] as const;
+const PRISMA_SCHEMA_VERSION = "20260808002511";
 
 type PrismaRuntimeMetadata = {
   _runtimeDataModel?: {
@@ -33,77 +18,31 @@ type PrismaRuntimeMetadata = {
   };
 };
 
-function hasCurrentProductFields(client: PrismaClient): boolean {
-  const metadata = (client as PrismaClient & PrismaRuntimeMetadata)
-    ._runtimeDataModel;
-  const fields = metadata?.models?.Producto?.fields;
-  if (!fields) return false;
-
-  const fieldNames = new Set(fields.map(({ name }) => name));
-  return REQUIRED_PRODUCT_FIELDS.every((field) => fieldNames.has(field));
-}
-
-function hasRequiredDelegates(client: PrismaClient): boolean {
-  return (
-    "appCustomization" in client &&
-    "categoria" in client &&
-    "grupoVariante" in client &&
-    "variante" in client &&
-    "grupoExtra" in client &&
-    "extra" in client &&
-    "producto" in client &&
-    "productoGrupoVariante" in client &&
-    "productoGrupoExtra" in client &&
-    "mesa" in client &&
-    "pedido" in client &&
-    "pedidoItem" in client &&
-    "pedidoItemVariante" in client &&
-    "pedidoItemExtra" in client &&
-    "caja" in client &&
-    "cajaPlantilla" in client &&
-    hasCurrentProductFields(client)
-  );
-}
-
-function hasCurrentOrderFields(client: PrismaClient): boolean {
+function hasCurrentAcademicSchema(client: PrismaClient): boolean {
   const metadata = (client as PrismaClient & PrismaRuntimeMetadata)._runtimeDataModel;
-  const fields = metadata?.models?.Pedido?.fields;
-  if (!fields) return false;
-  const fieldNames = new Set(fields.map(({ name }) => name));
-  return fieldNames.has("meseroNombre") && fieldNames.has("cajaId");
-}
+  const models = metadata?.models;
+  if (!models) return false;
 
-function hasCurrentBoxFields(client: PrismaClient): boolean {
-  const metadata = (client as PrismaClient & PrismaRuntimeMetadata)._runtimeDataModel;
-  const boxFields = metadata?.models?.Caja?.fields;
-  const templateFields = metadata?.models?.CajaPlantilla?.fields;
-  if (!boxFields || !templateFields) return false;
-
-  const boxFieldNames = new Set(boxFields.map(({ name }) => name));
-  const templateFieldNames = new Set(templateFields.map(({ name }) => name));
-  return (
-    [
-      "id",
-      "folio",
-      "estado",
-      "openSlot",
-      "montoApertura",
-      "montoEsperado",
-      "montoDeclarado",
-      "diferencia",
-      "pedidos",
-    ].every((field) => boxFieldNames.has(field)) &&
-    ["id", "nombre", "montoApertura", "activo"].every((field) =>
-      templateFieldNames.has(field),
-    )
-  );
+  return [
+    "User",
+    "AppCustomization",
+    "CicloEscolar",
+    "Grupo",
+    "Materia",
+    "MateriaGrupo",
+    "Alumno",
+    "Inscripcion",
+    "Calificacion",
+    "Asistencia",
+  ].every((model) => model in models);
 }
 
 function hasCurrentSchema(client: PrismaClient): boolean {
   return (
-    hasRequiredDelegates(client) &&
-    hasCurrentOrderFields(client) &&
-    hasCurrentBoxFields(client) &&
+    hasCurrentAcademicSchema(client) &&
+    "user" in client &&
+    "alumno" in client &&
+    "inscripcion" in client &&
     prismaGlobal.prismaSchemaVersion === PRISMA_SCHEMA_VERSION
   );
 }

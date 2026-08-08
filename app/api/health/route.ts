@@ -1,17 +1,13 @@
 export const dynamic = "force-dynamic";
 
-/** Lightweight public probe. It never reads Prisma, cookies or user data. */
+import { getPrisma } from "@/lib/prisma";
+
 export async function GET(): Promise<Response> {
-  return Response.json(
-    {
-      status: "ok",
-      service: "lowpos",
-      timestamp: new Date().toISOString(),
-    },
-    {
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-      },
-    },
-  );
+  try {
+    await getPrisma().$queryRaw`SELECT 1`;
+    return Response.json({ status: "ok", service: "lowschool", database: "ok", timestamp: new Date().toISOString() }, { headers: { "Cache-Control": "no-store, max-age=0" } });
+  } catch (error) {
+    console.error("[health] Database connection failed", error);
+    return Response.json({ status: "error", service: "lowschool", database: "unavailable", timestamp: new Date().toISOString() }, { status: 503, headers: { "Cache-Control": "no-store, max-age=0" } });
+  }
 }
