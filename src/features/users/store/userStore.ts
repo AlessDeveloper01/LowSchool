@@ -4,7 +4,7 @@ import { create } from "zustand";
 
 import type { ManagedUser, UserActionResult, UserFormInput, UserModal, UserStatusFilter } from "@/features/users/types/user.types";
 
-const emptyForm: UserFormInput = { name: "", username: "", email: "", role: "MESERO", password: "", confirmPassword: "" };
+const emptyForm: UserFormInput = { name: "", username: "", email: "", role: "ADMINISTRATIVO", password: "", confirmPassword: "" };
 
 interface UserState {
   modal: UserModal;

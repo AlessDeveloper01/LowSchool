@@ -16,9 +16,9 @@ import { useUserStore } from "@/features/users/store/userStore";
 import type { ManagedUser, UserStatusFilter } from "@/features/users/types/user.types";
 
 const dateFormatter = new Intl.DateTimeFormat("es-MX", { dateStyle: "medium" });
-const roleLabels = { SUPER_ADMIN: "Super administrador", MESERO: "Mesero", CLIENTE: "Cliente" } as const;
+const roleLabels: Record<ManagedUser["role"], string> = { SUPER_ADMIN: "Super administrador", ADMIN: "Administrador", ADMINISTRATIVO: "Administrativo" };
 const statusOptions = [{ value: "all", label: "Todos los estados" }, { value: "active", label: "Activos" }, { value: "inactive", label: "Inactivos" }];
-const roleOptions = [{ value: "all", label: "Todos los roles" }, { value: "SUPER_ADMIN", label: "Super administrador" }, { value: "MESERO", label: "Mesero" }, { value: "CLIENTE", label: "Cliente" }];
+const roleOptions = [{ value: "all", label: "Todos los roles" }, { value: "SUPER_ADMIN", label: "Super administrador" }, { value: "ADMIN", label: "Administrador" }, { value: "ADMINISTRATIVO", label: "Administrativo" }];
 
 function normalize(value: string): string {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();

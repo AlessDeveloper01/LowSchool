@@ -104,9 +104,7 @@ export function SidebarPanel({
         <ul className="space-y-0.5">
           {navigationConfig
             .filter(
-              (item) =>
-                (item.id !== "users" || userRole === "SUPER_ADMIN") &&
-                (item.id !== "box" || userRole !== "CLIENTE"),
+              (item) => item.id !== "users" || userRole === "SUPER_ADMIN",
             )
             .map((item) => (
             <SidebarItem
