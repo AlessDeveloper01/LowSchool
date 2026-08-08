@@ -50,7 +50,11 @@ export function SubjectsManager({ subjects }: { subjects: ManagedSubject[] }) {
   const [result, setResult] = useState<SubjectActionResult | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  useEffect(() => () => setNotice(null), []);
+  useEffect(() => {
+    if (!notice) return;
+    const timeout = window.setTimeout(() => setNotice(null), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
 
   const filtered = useMemo(() => {
     const term = normalize(search.trim());

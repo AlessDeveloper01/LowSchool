@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 import {
@@ -83,6 +83,12 @@ export function StudentsManager({ students, options }: { students: ManagedStuden
   const [preview, setPreview] = useState<StudentImportPreview | null>(null);
   const [mapping, setMapping] = useState<StudentImportMapping>(emptyMapping);
   const [importResult, setImportResult] = useState<{ message: string; errors?: Array<{ rowNumber: number; message: string }> } | null>(null);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timeout = window.setTimeout(() => setNotice(null), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
 
   const filtered = useMemo(() => {
     const term = normalize(search.trim());

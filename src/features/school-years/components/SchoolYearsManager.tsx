@@ -30,6 +30,11 @@ export function SchoolYearsManager({ schoolYears }: { schoolYears: ManagedSchool
   const dismissNotice = useSchoolYearStore((state) => state.dismissNotice);
   const reset = useSchoolYearStore((state) => state.reset);
   useEffect(() => () => reset(), [reset]);
+  useEffect(() => {
+    if (!notice) return;
+    const timeout = window.setTimeout(() => dismissNotice(), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [dismissNotice, notice]);
 
   const filtered = useMemo(() => {
     const term = normalize(search.trim());

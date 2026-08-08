@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   LuGraduationCap,
@@ -33,6 +33,7 @@ import { FormFeedback } from "@/components/ui/form";
 import {
   createGroupAction,
   deleteGroupAction,
+  promoteGroupAction,
   updateGroupAction,
   type GroupActionResult,
   type GroupOptions,
@@ -40,6 +41,7 @@ import {
 } from "@/features/groups/groups";
 
 const FORM_ID = "group-form";
+const PROMOTE_FORM_ID = "promote-group-form";
 const gradeOptions = [
   { value: "1", label: "1° grado" },
   { value: "2", label: "2° grado" },
@@ -59,7 +61,7 @@ export function GroupsManager({
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [modal, setModal] = useState<"form" | "delete" | null>(null);
+  const [modal, setModal] = useState<"form" | "delete" | "promote" | null>(null);
   const [selected, setSelected] = useState<ManagedGroup | null>(null);
   const [cicloEscolarId, setCicloEscolarId] = useState(
     options.schoolYears.find((schoolYear) => schoolYear.activo)?.id ??
@@ -72,6 +74,15 @@ export function GroupsManager({
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<GroupActionResult | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [targetCicloEscolarId, setTargetCicloEscolarId] = useState("");
+  const [targetGrado, setTargetGrado] = useState("2");
+  const [targetLetra, setTargetLetra] = useState("A");
+
+  useEffect(() => {
+    if (!notice) return;
+    const timeout = window.setTimeout(() => setNotice(null), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
 
   const filtered = useMemo(() => {
     const term = normalize(search.trim());
@@ -119,6 +130,19 @@ export function GroupsManager({
     setSelected(group);
     setResult(null);
     setModal("delete");
+  }
+
+  function openPromote(group: ManagedGroup): void {
+    setSelected(group);
+    setTargetCicloEscolarId(
+      options.schoolYears.find((schoolYear) => schoolYear.activo)?.id ??
+        options.schoolYears[0]?.id ??
+        "",
+    );
+    setTargetGrado(String(Math.min(group.grado + 1, 3)));
+    setTargetLetra(group.letra);
+    setResult(null);
+    setModal("promote");
   }
 
   function closeModal(): void {
@@ -185,6 +209,34 @@ export function GroupsManager({
         success: false,
         message: "No fue posible eliminar el grupo. Comprueba la conexión.",
       });
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function submitPromotion(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    if (!selected) return;
+    setPending(true);
+    setResult(null);
+
+    try {
+      const actionResult = await promoteGroupAction({
+        sourceGroupId: selected.id,
+        targetCicloEscolarId,
+        targetGrado: Number(targetGrado),
+        targetLetra,
+      });
+      if (!actionResult.success) {
+        setResult(actionResult);
+        return;
+      }
+
+      setNotice(actionResult.message);
+      closeModal();
+      router.refresh();
+    } catch {
+      setResult({ success: false, message: "No fue posible promover a los alumnos. Comprueba la conexión." });
     } finally {
       setPending(false);
     }
@@ -311,6 +363,13 @@ export function GroupsManager({
                             onSelect: () => openEdit(group),
                           },
                           {
+                            id: "promote",
+                            label: "Promover alumnos",
+                            icon: <LuGraduationCap />,
+                            disabled: group.studentsCount === 0,
+                            onSelect: () => openPromote(group),
+                          },
+                          {
                             id: "delete",
                             label: "Eliminar",
                             icon: <LuTrash2 />,
@@ -428,6 +487,61 @@ export function GroupsManager({
               <p className="mt-1.5 text-xs text-danger">{result.fieldErrors.materias[0]}</p>
             )}
           </div>
+        </form>
+      </Modal>
+
+      <Modal
+        open={modal === "promote"}
+        onOpenChange={(open) => !open && closeModal()}
+        title="Promover alumnos"
+        description="Crea o reutiliza el grupo destino, copia sus materias y registra a todos sus alumnos. No se copian calificaciones ni asistencias."
+        variant="form"
+        size="md"
+        closeOnOverlay={!pending}
+        footer={
+          <>
+            <Button variant="ghost" leftIcon={<LuX />} disabled={pending} onClick={closeModal}>
+              Cancelar
+            </Button>
+            <Button type="submit" form={PROMOTE_FORM_ID} leftIcon={<LuGraduationCap />} loading={pending} loadingText="Promoviendo...">
+              Promover alumnos
+            </Button>
+          </>
+        }
+      >
+        <form id={PROMOTE_FORM_ID} onSubmit={submitPromotion} className="space-y-5">
+          {result && !result.success && <FormFeedback tone="error" variant="soft">{result.message}</FormFeedback>}
+          <div className="rounded-xl bg-primary/5 p-4 text-sm text-muted">
+            Se moverán <strong className="text-foreground">{selected?.studentsCount ?? 0} alumnos</strong> de <strong className="text-foreground">{selected ? `${selected.grado}° ${selected.letra}` : "—"}</strong> al grupo destino.
+          </div>
+          <NativeSelect
+            label="Ciclo escolar destino"
+            value={targetCicloEscolarId}
+            required
+            options={options.schoolYears.map((schoolYear) => ({ value: schoolYear.id, label: `${schoolYear.nombre}${schoolYear.activo ? " · Activo" : ""}` }))}
+            error={result?.fieldErrors?.cicloEscolarId?.[0]}
+            onChange={(event) => setTargetCicloEscolarId(event.target.value)}
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <NativeSelect
+              label="Grado destino"
+              value={targetGrado}
+              required
+              options={gradeOptions}
+              error={result?.fieldErrors?.targetGrado?.[0]}
+              onChange={(event) => setTargetGrado(event.target.value)}
+            />
+            <Input
+              label="Letra destino"
+              value={targetLetra}
+              required
+              maxLength={1}
+              placeholder="A"
+              error={result?.fieldErrors?.targetLetra?.[0]}
+              onChange={(event) => setTargetLetra(event.target.value.toUpperCase())}
+            />
+          </div>
+          <p className="text-xs text-muted">Si el grupo destino ya existe, se conservará y sólo se agregarán las materias y alumnos que aún no tenga.</p>
         </form>
       </Modal>
 

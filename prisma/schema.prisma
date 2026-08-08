@@ -164,6 +164,7 @@ model Calificacion {
   trimestre      Trimestre
   valor          Float
 
+  @@unique([inscripcionId, materiaGrupoId, trimestre])
   @@index([inscripcionId, materiaGrupoId, trimestre])
 }
 
@@ -174,6 +175,7 @@ model Asistencia {
   materiaGrupo   MateriaGrupo @relation(fields: [materiaGrupoId], references: [id])
   materiaGrupoId String
   trimestre      Trimestre
+  asistencias    Int          @default(0)
   faltas         Int          @default(0)
 
   @@unique([inscripcionId, materiaGrupoId, trimestre])

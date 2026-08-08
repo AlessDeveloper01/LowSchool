@@ -23,6 +23,12 @@ const groupFields = {
 const groupSchema = z.object(groupFields);
 const updateGroupSchema = groupSchema.extend({ id: idSchema });
 const deleteGroupSchema = z.object({ id: idSchema });
+const promoteGroupSchema = z.object({
+  sourceGroupId: idSchema,
+  targetCicloEscolarId: idSchema,
+  targetGrado: z.coerce.number().int().min(1).max(3),
+  targetLetra: z.string().trim().toUpperCase().regex(/^[A-Z]$/, "La letra debe ser una sola letra de A a Z."),
+});
 
 const groupSelect = {
   id: true,
@@ -67,6 +73,7 @@ export interface GroupActionResult {
   message: string;
   fieldErrors?: Record<string, string[] | undefined>;
   data?: ManagedGroup;
+  promotedCount?: number;
 }
 
 class GroupError extends Error {
@@ -258,6 +265,76 @@ export async function deleteGroupAction(input: unknown): Promise<GroupActionResu
     return { success: true, message: "Grupo eliminado correctamente." };
   } catch (error) {
     if (isPrismaError(error, "P2003")) return { success: false, message: "No puedes eliminar un grupo que tiene información relacionada." };
+    return failure(error);
+  }
+}
+
+export async function promoteGroupAction(input: unknown): Promise<GroupActionResult> {
+  if (!(await canManageGroups())) return { success: false, message: "No tienes permisos para promover alumnos." };
+  const parsed = promoteGroupSchema.safeParse(input);
+  if (!parsed.success) return { success: false, message: "Revisa los datos del grupo destino.", fieldErrors: parsed.error.flatten().fieldErrors };
+
+  try {
+    const prisma = getPrisma();
+    const source = await prisma.grupo.findUnique({
+      where: { id: parsed.data.sourceGroupId },
+      select: {
+        id: true,
+        grado: true,
+        letra: true,
+        cicloEscolarId: true,
+        materias: { select: { materiaId: true } },
+        inscripciones: { select: { alumnoId: true } },
+      },
+    });
+    if (!source) throw new GroupError("El grupo de origen ya no existe.");
+    if (source.inscripciones.length === 0) throw new GroupError("El grupo no tiene alumnos inscritos para promover.");
+
+    const schoolYear = await prisma.cicloEscolar.findUnique({ where: { id: parsed.data.targetCicloEscolarId }, select: { id: true } });
+    if (!schoolYear) throw new GroupError("El ciclo escolar destino no existe.", "cicloEscolarId");
+    if (source.cicloEscolarId === parsed.data.targetCicloEscolarId && source.grado === parsed.data.targetGrado && source.letra === parsed.data.targetLetra) {
+      throw new GroupError("El grupo destino debe ser diferente al grupo de origen.");
+    }
+
+    const existingTarget = await prisma.grupo.findFirst({
+      where: { cicloEscolarId: parsed.data.targetCicloEscolarId, grado: parsed.data.targetGrado, letra: parsed.data.targetLetra },
+      select: { id: true },
+    });
+
+    const promotion = await prisma.$transaction(async (transaction) => {
+      const target = existingTarget ?? await transaction.grupo.create({
+        data: { cicloEscolarId: parsed.data.targetCicloEscolarId, grado: parsed.data.targetGrado, letra: parsed.data.targetLetra },
+        select: { id: true },
+      });
+      const existingSubjects = await transaction.materiaGrupo.findMany({ where: { grupoId: target.id }, select: { materiaId: true } });
+      const subjectIds = new Set(existingSubjects.map((subject) => subject.materiaId));
+      const subjectsToCreate = source.materias.filter(({ materiaId }) => !subjectIds.has(materiaId));
+      if (subjectsToCreate.length > 0) await transaction.materiaGrupo.createMany({ data: subjectsToCreate.map(({ materiaId }) => ({ materiaId, grupoId: target.id })) });
+
+      const sourceStudentIds = source.inscripciones.map(({ alumnoId }) => alumnoId);
+      const existingEnrollments = await transaction.inscripcion.findMany({ where: { grupoId: target.id, alumnoId: { in: sourceStudentIds } }, select: { alumnoId: true } });
+      const enrolledIds = new Set(existingEnrollments.map(({ alumnoId }) => alumnoId));
+      const studentsToCreate = source.inscripciones.filter(({ alumnoId }) => !enrolledIds.has(alumnoId));
+      if (studentsToCreate.length > 0) await transaction.inscripcion.createMany({ data: studentsToCreate.map(({ alumnoId }) => ({ alumnoId, grupoId: target.id, repetidor: false })) });
+
+      return {
+        promotedCount: studentsToCreate.length,
+        group: await transaction.grupo.findUniqueOrThrow({ where: { id: target.id }, select: groupSelect }),
+      };
+    });
+
+    revalidatePath(GROUPS_PATH);
+    revalidatePath("/students");
+    revalidatePath("/grades");
+    return {
+      success: true,
+      message: promotion.promotedCount > 0 ? `Se promovieron ${promotion.promotedCount} alumnos al grupo ${parsed.data.targetGrado}° ${parsed.data.targetLetra}.` : "Los alumnos ya estaban inscritos en el grupo destino.",
+      promotedCount: promotion.promotedCount,
+      data: mapGroup(promotion.group),
+    };
+  } catch (error) {
+    if (isPrismaError(error, "P2002")) return { success: false, message: "El grupo destino ya existe o uno de sus alumnos ya está inscrito." };
+    if (isPrismaError(error, "P2003")) return { success: false, message: "No se pudo completar la promoción por información relacionada." };
     return failure(error);
   }
 }
